@@ -21,7 +21,7 @@ from atomate.utils.utils import get_logger
 from pymatgen.io.qchem import QcInput, QcOutput
 
 __author__ = 'Shyam Dwaraknath'
-__email__ = 'shyamd@lbl.gov
+__email__ = 'shyamd@lbl.gov'
 __date__ = 'Mar 27, 2016'
 __version__ = "0.1.0"
 
@@ -129,6 +129,9 @@ class QChemDrone(AbstractDrone):
             logger.error("Error in " + os.path.abspath(dir_name) + ".\n" + traceback.format_exc())
             return None
 
+
+    def get_valid_paths(self, path):
+        return [path]
 
     def as_dict(self):
         init_args = {
