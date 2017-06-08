@@ -8,7 +8,7 @@ This module defines the base qchem workflows
 
 
 from atomate.utils.utils import get_logger, append_fw_wf
-from fireworks.core.firework import Firework
+from fireworks.core.firework import Workflow
 from atomate.qchem.fireworks.core import OptimizeFW
 __author__ = 'Shyam Dwaraknath'
 __email__ = 'shyamd@lbl.gov'
