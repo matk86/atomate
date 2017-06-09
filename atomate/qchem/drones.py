@@ -45,7 +45,7 @@ class QChemDrone(AbstractDrone):
     def __init__(self, additional_fields=None, use_full_uri=True):
         self.additional_fields = additional_fields or {}
         self.use_full_uri = use_full_uri
-
+        self.runs = []
 
     def assimilate(self, path):
         """
@@ -61,13 +61,20 @@ class QChemDrone(AbstractDrone):
             (dict): a task dictionary
         """
 
-        input_files = [QcInput.from_file(f) for f in self.filter_files(path,file_pattern="qc.in")]
-        output_files = [QcOutput.from_file(f) for f in self.filter_files(path,file_pattern="qc.out")]
+        input_files = [QcInput.from_file(f) for name,f in self.filter_files(path,file_pattern="qc.in").items()]
+        output_files = [QcOutput.from_file(f) for name,f in self.filter_files(path,file_pattern="qc.out").items()]
         logger.info("Getting task doc for base dir :{}".format(path))
+        d = self.generate_doc(path,input_files,output_files)
+        self.post_process(d)
+        return d
 
-        return self.generate_doc(path,input_files,output_files)
-
-
+    def post_process(self,d):
+        """
+        Simple post processing
+        :param d: task dictionary
+        :return: 
+        """
+        d['state'] = 'successful'
 
     def filter_files(self, path, file_pattern="vasprun.xml"):
         """
@@ -117,7 +124,7 @@ class QChemDrone(AbstractDrone):
             if self.use_full_uri:
                 fullpath = get_uri(dir_name)
             d = {k: v for k, v in self.additional_fields.items()}
-            d["schema"] = {"code": "atomate", "version": QchemDrone.__version__}
+            d["schema"] = {"code": "atomate", "version": QChemDrone.__version__}
             d["dir_name"] = fullpath
             d["inputs"] = [input.as_dict() for input in inputs]
             d["outputs"] = [output.as_dict() for output in outputs]
