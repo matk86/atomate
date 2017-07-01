@@ -93,7 +93,7 @@ class TestVaspWorkflows(AtomateTest):
 
                 self.assertEqual(bs["@class"], "BandStructure")
 
-            elif mode == "nscf line":
+            else:
                 for k in ["is_spin_polarized", "band_gap", "structure",
                           "kpoints", "is_metal", "vbm", "cbm", "labels_dict",
                           "projections", "lattice_rec", "bands", "branches"]:
