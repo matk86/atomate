@@ -94,23 +94,21 @@ class LammpsForceFieldFW(Firework):
         mols_number = mols_number or [1]
         topologies = topologies or Topology.from_molecule(final_molecule, ff_map=ff_site_property)
 
-        # one constituent molecule ==> no packmol usage.
-        tasks = [CopyPackmolOutputs(calc_loc=True)] if mols_number != [1] else []
+        tasks = [
 
-        tasks.extend(
-            [
-                WriteInputFromForceFieldAndTopology(
-                    input_file=input_file, final_molecule_path=final_molecule,
-                    constituent_molecules=constituent_molecules, mols_number=mols_number,
-                    forcefield=forcefield, topologies=topologies, input_filename=input_filename,
-                    user_settings=user_settings, ff_site_property=ff_site_property, box_size=box_size),
+            WriteInputFromForceFieldAndTopology(input_file=input_file, final_molecule=final_molecule,
+                                                constituent_molecules=constituent_molecules,
+                                                mols_number=mols_number, forcefield=forcefield,
+                                                topologies=topologies, input_filename=input_filename,
+                                                user_settings=user_settings, data_filename=data_filename,
+                                                ff_site_property=ff_site_property, box_size=box_size),
 
-                RunLammpsDirect(lammps_cmd=lammps_cmd, input_filename=input_filename),
+            RunLammpsDirect(lammps_cmd=lammps_cmd, input_filename=input_filename),
 
-                LammpsToDB(input_filename=input_filename, data_filename=data_filename,
-                           log_filename=log_filename, dump_filenames=dump_filenames,
-                           db_file=db_file, additional_fields={"task_label": name})
-            ])
+            LammpsToDB(input_filename=input_filename, data_filename=data_filename,
+                       log_filename=log_filename, dump_filenames=dump_filenames,
+                       db_file=db_file, additional_fields={"task_label": name})
+            ]
 
         super(LammpsForceFieldFW, self).__init__(tasks, parents=parents, name=name, **kwargs)
 
@@ -119,7 +117,7 @@ class PackmolFW(Firework):
 
     def __init__(self, molecules, packing_config, tolerance=2.0, filetype="xyz", control_params=None,
                  output_file="packed.xyz",  copy_to_current_on_exit=False, site_property=None,
-                 parents=None, name="PackmolFW", **kwargs):
+                 parents=None, name="PackmolFW", packmol_cmd="packmol", **kwargs):
         """
 
         Args:
@@ -137,6 +135,7 @@ class PackmolFW(Firework):
             site_property (str): the specified site property will be restored for the final Molecule object.
             parents ([Firework]): parent fireworks
             name (str): firework name
+            packmol_cmd (str): path to packmol bin
             **kwargs:
         """
         control_params = control_params or {'maxit': 20, 'nloop': 600}
@@ -144,7 +143,8 @@ class PackmolFW(Firework):
         tasks = [
             RunPackmol(molecules=molecules, packing_config=packing_config, tolerance=tolerance,
                        filetype=filetype, control_params=control_params,  output_file=output_file,
-                       copy_to_current_on_exit=copy_to_current_on_exit, site_property=site_property),
+                       copy_to_current_on_exit=copy_to_current_on_exit, site_property=site_property,
+                       packmol_cmd=packmol_cmd),
 
             PassCalcLocs(name=name)
 

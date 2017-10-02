@@ -106,7 +106,10 @@ def recursive_get_result(d, result):
         return get_mongolike(result, d[2:])
 
     elif isinstance(d, six.string_types) and d[:3] == "a>>":
-        return getattr(result, d[3:])
+        attribute = getattr(result, d[3:])
+        if callable(attribute):
+            attribute = attribute()
+        return attribute
     
     elif isinstance(d, dict):
         return {k: recursive_get_result(v, result) for k, v in d.items()}
@@ -136,7 +139,7 @@ def get_meta_from_structure(structure):
             'elements': elsyms,
             'nelements': len(elsyms),
             'formula': comp.formula,
-            'formula_reduced': comp.reduced_formula,
+            'formula_pretty': comp.reduced_formula,
             'formula_reduced_abc': Composition(comp.reduced_formula)
             .alphabetical_formula,
             'formula_anonymous': comp.anonymized_formula,
@@ -170,7 +173,7 @@ def get_fws_and_tasks(workflow, fw_name_constraint=None, task_name_constraint=No
 
 # TODO: @computron - move this somewhere else, maybe dedicated serialization package - @computron
 # TODO: @computron - also review this code for clarity - @computron
-def get_wf_from_spec_dict(structure, wfspec):
+def get_wf_from_spec_dict(structure, wfspec, common_param_updates=None):
     """
     Load a WF from a structure and a spec dict. This allows simple
     custom workflows to be constructed quickly via a YAML file.
@@ -219,6 +222,7 @@ def get_wf_from_spec_dict(structure, wfspec):
 
             Finally, `name` is used to set the Workflow name
             (structure formula + name) which can be helpful in record keeping.
+        common_param_updates (dict): A dict specifying any user-specified updates to common_params
 
     Returns:
         Workflow
@@ -241,6 +245,8 @@ def get_wf_from_spec_dict(structure, wfspec):
 
     fws = []
     common_params = process_params(wfspec.get("common_params", {}))
+    if common_param_updates:
+        common_params.update(common_param_updates)
     for d in wfspec["fireworks"]:
         modname, classname = d["fw"].rsplit(".", 1)
         cls_ = load_class(modname, classname)
@@ -277,3 +283,20 @@ def load_class(modulepath, classname):
     """
     mod = __import__(modulepath, globals(), locals(), [classname], 0)
     return getattr(mod, classname)
+
+def recursive_update(d, u):
+    """
+    Recursive updates d with values from u
+    Args:
+        d (dict): dict to update
+        u (dict): updates to propogate
+    """
+
+    for k, v in u.items():
+        if k in d:
+            if isinstance(v, dict) and isinstance(d[k], dict):
+                recursive_update(d[k], v)
+            else:
+                d[k] = v
+        else:
+            d[k] = v

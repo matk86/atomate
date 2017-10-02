@@ -7,10 +7,10 @@ This module defines firetasks for writing LAMMPS input files (data file and the 
 parameters file)
 """
 
+import os
 import six
 
 from pymatgen import Molecule
-from pymatgen.io.lammps.force_field import ForceField
 from pymatgen.io.lammps.data import LammpsForceFieldData
 from pymatgen.io.lammps.sets import LammpsInputSet
 
@@ -50,9 +50,9 @@ class WriteInputFromIOSet(FiretaskBase):
 class WriteInputFromForceFieldAndTopology(FiretaskBase):
 
     required_params = ["input_file", "final_molecule", "constituent_molecules", "mols_number",
-                       "box_size" "forcefield", "topologies", "input_filename"]
+                       "box_size", "forcefield", "topologies", "input_filename"]
 
-    optional_params = ["user_settings", "ff_site_property"]
+    optional_params = ["data_filename", "user_settings", "ff_site_property"]
 
     def run_task(self, fw_spec):
 
@@ -63,9 +63,13 @@ class WriteInputFromForceFieldAndTopology(FiretaskBase):
         topologies = self["topologies"]
 
         user_settings = self.get("user_settings", {})
-        data_filename = user_settings.get("data_file", "lammps.data")
+        data_filename = self.get("data_filename", user_settings.get("data_file", "lammps.data"))
         final_molecule = self["final_molecule"]
-        if isinstance(final_molecule, six.string_types):
+
+        # if the final molecule was generated using packmol
+        if fw_spec.get("packed_mol", None):
+            final_molecule = fw_spec["packed_mol"]
+        elif isinstance(final_molecule, six.string_types):
             final_molecule = Molecule.from_file(final_molecule)
 
         lammps_ff_data = LammpsForceFieldData.from_forcefield_and_topology(molecules, mols_number,
@@ -73,7 +77,7 @@ class WriteInputFromForceFieldAndTopology(FiretaskBase):
                                                                            final_molecule,
                                                                            forcefield, topologies)
 
-        lammps_input_set = LammpsInputSet.from_file("forcefield", self["input_file"],
+        lammps_input_set = LammpsInputSet.from_file("ff-inputset", self["input_file"],
                                                     user_settings=user_settings,
                                                     lammps_data=lammps_ff_data,
                                                     data_filename=data_filename,

@@ -8,10 +8,11 @@ This module defines firetasks for running lammps
 
 import os
 import shutil
+import json
 
 from pymatgen.io.lammps.utils import PackmolRunner, LammpsRunner
 
-from fireworks import explicit_serialize, FiretaskBase
+from fireworks import explicit_serialize, FiretaskBase, FWAction
 
 from atomate.utils.utils import get_logger
 
@@ -83,7 +84,7 @@ class RunPackmol(FiretaskBase):
         site_property (str): the specified site property will be restored for the final Molecule object.
     """
 
-    required_params = ["molecules", "packing_config"]
+    required_params = ["molecules", "packing_config", "packmol_cmd"]
     optional_params = ["tolerance", "filetype", "control_params", "output_file",
                        "copy_to_current_on_exit", "site_property"]
 
@@ -92,7 +93,9 @@ class RunPackmol(FiretaskBase):
                             tolerance=self.get("tolerance", 2.0),
                             filetype=self.get("filetype", "xyz"),
                             control_params=self.get("control_params", {"nloop": 1000}),
-                            output_file=self.get("output_file", "packed_mol.xyz"))
-        logger.info("Running packmol")
-        pmr.run(self.get("copy_to_current_on_exit", False), site_property=self.get("site_property", None))
+                            output_file=self.get("output_file", "packed_mol.xyz"),
+                            bin=self["packmol_cmd"])
+        logger.info("Running {}".format(self["packmol_cmd"]))
+        packed_mol = pmr.run(self.get("copy_to_current_on_exit", False), site_property=self.get("site_property", None))
         logger.info("Packmol finished running.")
+        return FWAction(mod_spec=[{'_set': {'packed_mol': packed_mol}}])
