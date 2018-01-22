@@ -681,3 +681,186 @@ class DeleteFileTask(FireTaskBase, FWSerializable):
                 os.remove(fn)
             if os.path.exists(gzfn):
                 os.remove(gzfn)
+
+
+relax step 1:
+ediff = -1e-6
+ediffg = -0.1
+ENCUT_ENHANCE_RATIO: 0.05
+ibrion =1
+istart = 0
+LCHARG=false
+nelmin=5
+NSW=200
+potim=0.3
+sigma= 0.1
+
+kpoints legth = 16
+
+step 2:
+addgrid = true
+ediff  =-1e-8
+ediffg = -0.01
+ENCUT_ENHANCE_RATIO: 0.2
+IBRION: 3
+IOPT: 7
+ISYM: 0
+ISTART: 0
+LCHARG: false
+NELMIN: 5
+NSW: 200
+POTIM: 0
+SIGMA: 0.03
+
+  KPOINTS:
+length: 24
+
+step 3:
+ADDGRID: true
+EDIFF: -1.0e-10
+EDIFFG: -0.002
+ENCUT_ENHANCE_RATIO: 0.3
+FTIMEMAX: 0.1
+IBRION: 3
+IOPT: 7
+ISTART: 0
+ISYM: 0
+LCHARG: false
+MAXMOVE: 0.02
+NELMIN: 10
+NSW: 100
+POTIM: 0
+SIGMA: 0.01
+TIMESTEP: 0.01
+FNMIN: 3
+
+KPOINTS:
+length: 32
+
+
+CS:
+    DQ: 0.001
+    EDIFF: -1.0e-10
+    ENCUT_ENHANCE_RATIO: 0.3
+    ICHIBARE: 1
+    ISMEAR: -5
+    ISTART: 0
+    ISYM: 0
+    LCHARG: false
+    LCHIMAG: true
+    LNMR_SYM_RED: true
+    LREAL: AUTO
+    LWAVE: false
+    NELMIN: 10
+    NSLPLINE: true
+    PREC: ACCURATE
+    SIGMA: 0.01
+  KPOINTS:
+length: 32
+
+
+
+EFG:
+ ALGO: FAST
+    EDIFF: -1.0e-10
+    ENCUT_ENHANCE_RATIO: 0.3
+    ISMEAR: -5
+    ISTART: 0
+    ISYM: 0
+    LCHARG: false
+    LEFG: true
+    LREAL: AUTO
+    LWAVE: false
+    NELMIN: 10
+    PREC: ACCURATE
+    QUAD_EFG_MAP:
+      H:
+        H-2: 2.860
+      Li:
+        Li-6: -0.808
+        Li-7: -40.1
+      Be:
+        Be-9: 52.88
+      B:
+        B-10: 84.59
+        B-11: 40.59
+      C:
+        C-11: 33.27
+      N:
+        N-14: 20.44
+      O:
+        O-17: -25.58
+      F:
+        F-19: -94.2
+      Ne:
+        Ne-21: 101.55
+      Na:
+        Na-23: 104.1
+      Mg:
+        Mg-25: 199.4
+      Al:
+        Al-27: 146.6
+      S:
+        S-33: -67.8
+        S-35: 47.1
+      Cl:
+        Cl-35: -81.65
+        Cl-37: -64.35
+      K:
+        K-39: 58.5
+        K-40: -73.0
+        K-41: 71.1
+      Ca:
+        Ca-41: -66.5
+        Ca-43: -40.8
+      Sc:
+        Sc-45: -220.2
+      Ti:
+        Ti-47: 302.10
+        Ti-49: 247.11
+      V:
+        V-50: 210.40
+        V-51: -52.10
+      Cr:
+        Cr-53: -150.50
+      Mn:
+        Mn-55: 330.10
+      Fe:
+        Fe-57: 160.0
+      Co:
+        Co-59: 420.30
+      Ni:
+        Ni-61: 162.15
+      Cu:
+        Cu-63: -220.15
+        Cu-65: -204.14
+      Zn:
+        Zn-67: 150.15
+      Sr:
+        Sr-87: 305.2
+      In:
+        In-113: 759.8
+        In-115: 770.8
+      Sn:
+        Sn-119: -132.1
+      Sb:
+        Sb-121: -543.11
+        Sb-123: -692.14
+      I:
+        I-127: -696.12
+        I-129: -604.10
+      La:
+        La-139: 200.6
+      Hg:
+        Hg-201: 387.6
+      Ra:
+        Ra-223: 1210.3
+    SIGMA: 0.01
+
+  KPOINTS:
+length: 32
+
+user_incar_settings = None,
+user_kpoints_settings = None, user_potcar_settings = None,
+constrain_total_magmom = False, sort_structure = True,
+potcar_functional = "PBE",
